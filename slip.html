@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Salary Slip Signature</title>
 
-  <!-- html2pdf.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <!-- Signature Pad -->
   <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.6/dist/signature_pad.umd.min.js"></script>
 
   <style>
@@ -65,26 +63,32 @@
     .clear-btn:hover {
       background: #a71d2a;
     }
-    #pdf-container {
-      display: none;
-      width: 794px; /* A4 width in pixels at 96dpi */
-      padding: 40px;
+    /* Hidden PDF container */
+    #pdf-content {
+      width: 794px;   /* A4 width in pixels at 96dpi */
+      min-height: 1123px; /* A4 height in pixels at 96dpi */
       background: #fff;
-      color: #333;
-      font-family: Arial, sans-serif;
+      color: #000;
+      padding: 40px;
+      box-sizing: border-box;
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
     }
-    #pdf-container h2 {
+    #pdf-content h2 {
       color: #dd2476;
+      margin-top: 0;
     }
-    #pdf-container img {
+    #pdf-content img {
       border: 2px solid #000;
       margin-top: 10px;
+      max-width: 100%;
     }
   </style>
 </head>
 <body>
   <div class="card" id="slipCard">
-    <h2>Afaq Caro Salary Slip</h2>
+    <h2>Afaq Cargo Salary Slip</h2>
     <p><strong>Employee Name:</strong> <span id="empName"></span></p>
     <p><strong>Date:</strong> <span id="date"></span></p>
     <p><strong>Salary Amount:</strong> Rs. <span id="amount"></span></p>
@@ -96,7 +100,7 @@
     <button class="clear-btn" onclick="clearSignature()">Clear Signature</button>
   </div>
 
-  <div id="pdf-container"></div>
+  <div id="pdf-content"></div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
@@ -136,38 +140,34 @@
         return;
       }
 
-      // Generate signature image
+      // Get signature image
       const signatureImage = signaturePad.toDataURL("image/png");
 
-      // Prepare PDF content
-      const pdfContainer = document.getElementById("pdf-container");
+      // Build the PDF HTML content
+      const pdfContainer = document.getElementById("pdf-content");
       pdfContainer.innerHTML = `
         <h2>Salary Slip</h2>
         <p><strong>Employee Name:</strong> ${empName}</p>
         <p><strong>Date:</strong> ${date}</p>
         <p><strong>Salary Amount:</strong> Rs. ${amount}</p>
         <p><strong>Signature:</strong></p>
-        <img src="${signatureImage}" style="width: 300px;">
+        <img src="${signatureImage}" style="width:300px;" />
       `;
 
-      pdfContainer.style.display = "block";
-
       html2pdf().from(pdfContainer).set({
-        margin: 10,
-        filename: `${empName || 'salary-slip'}.pdf`,
+        margin: 0,
+        filename: `${empName || "salary-slip"}.pdf`,
         html2canvas: {
-          scale: 3, // higher resolution
-          useCORS: true,
+          scale: 3,
           scrollY: 0,
+          useCORS: true
         },
         jsPDF: {
-          unit: 'mm',
-          format: 'a4',
+          unit: 'px',
+          format: [794, 1123], // exact A4
           orientation: 'portrait'
         }
-      }).save().then(() => {
-        pdfContainer.style.display = "none";
-      });
+      }).save();
     }
   </script>
 </body>
