@@ -92,7 +92,7 @@
         return;
       }
 
-      const base = window.location.origin + "Salary_Slip/slip.html";
+      const base = window.location.origin + "/Salary_Slip/slip.html";
       const link = `${base}?name=${name}&date=${date}&amount=${amount}`;
       document.getElementById('generatedLink').textContent = link;
       document.getElementById('linkBox').style.display = "block";
