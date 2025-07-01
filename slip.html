@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Salary Slip Signature</title>
+
+  <!-- html2pdf.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <!-- Signature Pad -->
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.6/dist/signature_pad.umd.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #ff512f, #dd2476);
+      margin: 0;
+      padding: 20px;
+      color: #fff;
+    }
+    .card {
+      background: #fff;
+      color: #333;
+      max-width: 500px;
+      margin: auto;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    }
+    h1 {
+      color: #000000;
+      font-family:Georgia, 'Times New Roman', Times, serif;
+      text-align: center;
+    }
+    p {
+      font-size: 16px;
+      margin: 45px 0;
+    }
+    canvas {
+      border: 2px solid #333;
+      border-radius: 5px;
+      width: 100%;
+      height: 200px;
+      background: #fff;
+      margin-top: 10px;
+      touch-action: none;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      background: #dd2476;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #a91c53;
+    }
+    .clear-btn {
+      background: #dc3545;
+    }
+    .clear-btn:hover {
+      background: #a71d2a;
+    }
+    #pdf-content {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="card" id="slipCard">
+    <h1>Afaq Cargo Salary Slip</h1>
+    <p><strong>Employee Name:</strong> <span id="empName"></span></p>
+    <p><strong>Date:</strong> <span id="date"></span></p>
+    <p><strong>Salary Amount:</strong> <span id="amount"></span> Riyal</p>
+
+    <p><strong>Signature:</strong></p>
+    <canvas id="signature"></canvas>
+
+    <button onclick="downloadPDF()">Save & Download PDF</button>
+    <button class="clear-btn" onclick="clearSignature()">Clear Signature</button>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const empName = decodeURIComponent(params.get("name") || "");
+    const date = decodeURIComponent(params.get("date") || "");
+    const amount = decodeURIComponent(params.get("amount") || "");
+
+    document.getElementById("empName").textContent = empName;
+    document.getElementById("date").textContent = date;
+    document.getElementById("amount").textContent = amount;
+
+    const canvas = document.getElementById("signature");
+    const signaturePad = new SignaturePad(canvas, {
+      penColor: "black",
+      backgroundColor: "white",
+      minWidth: 2,
+      maxWidth: 4
+    });
+
+    function resizeCanvas() {
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      canvas.width = canvas.offsetWidth * ratio;
+      canvas.height = canvas.offsetHeight * ratio;
+      canvas.getContext("2d").scale(ratio, ratio);
+      signaturePad.clear();
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    function clearSignature() {
+      signaturePad.clear();
+    }
+
+    function downloadPDF() {
+      if (signaturePad.isEmpty()) {
+        alert("Please sign before saving PDF.");
+        return;
+      }
+
+      // Clone the slip card
+      const original = document.getElementById("slipCard");
+      const clone = original.cloneNode(true);
+
+      // Replace the canvas in the clone with the signature image
+      const signatureImg = new Image();
+      signatureImg.src = signaturePad.toDataURL("image/png");
+      signatureImg.style.width = "300px";
+      signatureImg.style.border = "2px solid #000";
+      signatureImg.style.display = "block";
+      signatureImg.style.marginTop = "10px";
+
+      // Find canvas in clone and replace
+      const clonedCanvas = clone.querySelector("canvas");
+      clonedCanvas.replaceWith(signatureImg);
+
+      // Remove buttons from cloned HTML
+      clone.querySelectorAll("button").forEach(btn => btn.remove());
+
+      html2pdf().from(clone).set({
+        margin: 10,
+        filename: `${empName}_salary_slip.pdf`,
+        html2canvas: { scale: 3 },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+      }).save();
+    }
+  </script>
+</body>
+</html>

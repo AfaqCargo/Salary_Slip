@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create Salary Slip Link</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #6a11cb, #2575fc);
+      margin: 0;
+      padding: 20px;
+      color: #fff;
+    }
+    .card {
+      background: #fff;
+      color: #333;
+      max-width: 500px;
+      margin: auto;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    }
+    h2 {
+      text-align: center;
+      color: #2575fc;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      background: #2575fc;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #1a4fb7;
+    }
+    .link-box {
+      margin-top: 20px;
+      word-break: break-all;
+      background: #f0f0f0;
+      padding: 10px;
+      border-radius: 5px;
+      color: #333;
+      font-size: 14px;
+    }
+    .copy-btn {
+      background: #28a745;
+      margin-top: 10px;
+    }
+    .copy-btn:hover {
+      background: #1d7d32;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Create Salary Slip Link</h2>
+    <input type="text" id="empName" placeholder="Employee Name">
+    <input type="date" id="date">
+    <input type="number" id="amount" placeholder="Salary Amount">
+
+    <button onclick="generateLink()">Generate Link</button>
+
+    <div class="link-box" id="linkBox" style="display:none;">
+      <span id="generatedLink"></span>
+      <button class="copy-btn" onclick="copyLink()">Copy URL</button>
+    </div>
+  </div>
+
+  <script>
+    function generateLink() {
+      const name = encodeURIComponent(document.getElementById('empName').value.trim());
+      const date = encodeURIComponent(document.getElementById('date').value.trim());
+      const amount = encodeURIComponent(document.getElementById('amount').value.trim());
+
+      if (!name || !date || !amount) {
+        alert("Please fill all fields.");
+        return;
+      }
+
+      const base = window.location.origin + "/slip.html";
+      const link = `${base}?name=${name}&date=${date}&amount=${amount}`;
+      document.getElementById('generatedLink').textContent = link;
+      document.getElementById('linkBox').style.display = "block";
+    }
+
+    function copyLink() {
+      const text = document.getElementById('generatedLink').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Link copied to clipboard!");
+      }).catch(err => {
+        alert("Failed to copy: " + err);
+      });
+    }
+  </script>
+</body>
+</html>
