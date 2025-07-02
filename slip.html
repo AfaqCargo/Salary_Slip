@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Salary Slip Signature</title>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.6/dist/signature_pad.umd.min.js"></script>
 
   <style>
@@ -46,7 +46,7 @@
     button {
       width: 100%;
       padding: 12px;
-      margin-top: 20px;
+      margin-top: 15px;
       background: #dd2476;
       color: #fff;
       border: none;
@@ -64,10 +64,9 @@
     .clear-btn:hover {
       background: #a71d2a;
     }
-    /* PDF Styles */
-    #pdf-content {
+    #image-content {
       width: 794px;
-      height: 1123px;
+      min-height: 1123px;
       background: #fff;
       color: #333;
       padding: 50px;
@@ -76,33 +75,33 @@
       font-family: 'Segoe UI', sans-serif;
       border: 1px solid #ccc;
     }
-    #pdf-content header {
+    #image-content header {
       text-align: center;
       margin-bottom: 30px;
     }
-    #pdf-content header img {
+    #image-content header img {
       max-width: 150px;
       margin-bottom: 10px;
     }
-    #pdf-content header h1 {
+    #image-content header h1 {
       color: #dd2476;
       margin: 0;
       font-size: 28px;
     }
-    #pdf-content .info {
+    #image-content .info {
       margin-bottom: 30px;
     }
-    #pdf-content .info p {
+    #image-content .info p {
       font-size: 18px;
       margin: 8px 0;
     }
-    #pdf-content .signature-box {
+    #image-content .signature-box {
       border: 2px solid #333;
       padding: 15px;
       display: inline-block;
       margin-top: 20px;
     }
-    #pdf-content .signature-box img {
+    #image-content .signature-box img {
       width: 300px;
       display: block;
       border: 2px solid #000;
@@ -114,16 +113,17 @@
     <h2>Afaq Cargo Salary Slip</h2>
     <p><strong>Employee Name:</strong> <span id="empName"></span></p>
     <p><strong>Date:</strong> <span id="date"></span></p>
-    <p><strong>Salary Amount:</strong> <span id="amount"> Riyal</span></p>
+    <p><strong>Salary Amount:</strong> <span id="amount"></span> Riyal</p>
 
     <p><strong>Signature:</strong></p>
     <canvas id="signature"></canvas>
 
-    <button onclick="downloadPDF()">Save & Download PDF</button>
+    <button onclick="downloadImage()">Save as Image</button>
+    <button onclick="shareWhatsApp()">Share on WhatsApp</button>
     <button class="clear-btn" onclick="clearSignature()">Clear Signature</button>
   </div>
 
-  <div id="pdf-content"></div>
+  <div id="image-content"></div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
@@ -157,16 +157,16 @@
       signaturePad.clear();
     }
 
-    function downloadPDF() {
+    function downloadImage() {
       if (signaturePad.isEmpty()) {
-        alert("Please sign before saving PDF.");
+        alert("Please sign before saving image.");
         return;
       }
 
       const signatureImage = signaturePad.toDataURL("image/png");
 
-      const pdfContainer = document.getElementById("pdf-content");
-      pdfContainer.innerHTML = `
+      const imageContainer = document.getElementById("image-content");
+      imageContainer.innerHTML = `
         <header>
           <img src="afaq logo.jpg" alt="Company Logo">
           <h1>Salary Slip</h1>
@@ -182,30 +182,26 @@
         </div>
       `;
 
-      pdfContainer.style.display = "block";
+      imageContainer.style.display = "block";
 
       setTimeout(() => {
-        html2pdf()
-          .from(pdfContainer)
-          .set({
-            margin: 0,
-            filename: `${empName || "salary-slip"}.pdf`,
-            html2canvas: {
-              scale: 3,
-              scrollY: 0,
-              useCORS: true
-            },
-            jsPDF: {
-              unit: 'px',
-              format: [794, 1123],
-              orientation: 'portrait'
-            }
-          })
-          .save()
-          .then(() => {
-            pdfContainer.style.display = "none";
-          });
+        html2canvas(imageContainer, { scale: 3 }).then(canvas => {
+          const imgData = canvas.toDataURL("image/png");
+
+          // download image
+          const link = document.createElement("a");
+          link.href = imgData;
+          link.download = `${empName || "salary-slip"}.png`;
+          link.click();
+
+          imageContainer.style.display = "none";
+        });
       }, 300);
+    }
+
+    function shareWhatsApp() {
+      const message = encodeURIComponent(`Hello ${empName}, your salary slip is ready. Kindly check your slip and sign it.`);
+      window.open(`https://wa.me/?text=${message}`, "_blank");
     }
   </script>
 </body>
