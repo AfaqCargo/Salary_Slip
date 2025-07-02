@@ -119,7 +119,6 @@
     <canvas id="signature"></canvas>
 
     <button onclick="downloadImage()">Save as Image</button>
-    <button onclick="shareWhatsApp()">Share on WhatsApp</button>
     <button class="clear-btn" onclick="clearSignature()">Clear Signature</button>
   </div>
 
@@ -199,10 +198,7 @@
       }, 300);
     }
 
-    function shareWhatsApp() {
-      const message = encodeURIComponent(`Hello ${empName}, your salary slip is ready. Kindly check your slip and sign it.`);
-      window.open(`https://wa.me/?text=${message}`, "_blank");
-    }
+
   </script>
 </body>
 </html>
